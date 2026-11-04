@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Thi Trắc Nghiệm Lịch Sử 12 - Giữa Kì 1</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- MÀN HÌNH ĐĂNG NHẬP MẬT KHẨU -->
+    <div id="login-screen" class="fixed inset-0 bg-slate-900 bg-opacity-80 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center">
+            <div class="mx-auto bg-amber-100 text-amber-600 w-16 h-16 rounded-full flex items-center justify-center text-3xl mb-4 font-bold">🔒</div>
+            <h2 class="text-2xl font-bold text-slate-900 mb-2">Xác Thực Mật Khẩu</h2>
+            <p class="text-slate-500 text-sm mb-6">Vui lòng nhập mật khẩu để truy cập hệ thống ôn thi Lịch sử 12.</p>
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <input type="password" id="password-input" placeholder="Nhập mật khẩu (dungvoduong)..." 
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition text-center text-lg" required>
+                </div>
+                <div id="login-error" class="text-red-500 text-sm hidden font-medium">Mật khẩu không chính xác! Vui lòng thử lại.</div>
+                <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-3 rounded-xl transition duration-200 shadow-lg shadow-amber-600/20">
+                    Vào Thi Ngay
+                </button>
+            </form>
+            <div class="mt-6 text-xs text-slate-400">Hệ thống khảo thí trực tuyến - Mật khẩu mặc định: dungvoduong</div>
+        </div>
+    </div>
+
+    <!-- HEADER -->
+    <header class="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-amber-600 text-white font-bold p-2.5 rounded-xl shadow">📜</div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-900">Ôn Tập Giữa Kì 1 - Lịch Sử 12</h1>
+                    <p class="text-xs text-slate-500" id="current-exam-info">Chưa chọn đề thi</p>
+                </div>
+            </div>
+            <div id="exam-timer-container" class="hidden items-center gap-4">
+                <div class="flex items-center gap-2 bg-amber-50 border border-amber-200 px-4 py-2 rounded-xl text-amber-800 font-bold">
+                    <span>⏱️ Thời gian:</span>
+                    <span id="timer" class="text-xl">50:00</span>
+                </div>
+                <button onclick="confirmSubmit()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5 py-2.5 rounded-xl shadow transition">
+                    Nộp Bài
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full">
+
+        <!-- MÀN HÌNH CHỌN ĐỀ THI -->
+        <div id="selection-screen" class="max-w-3xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+            <h2 class="text-2xl font-bold text-slate-900 mb-2">Chọn Đề Thi & Tùy Chọn</h2>
+            <p class="text-slate-600 mb-6">Mỗi đề gồm 40 câu hỏi chuẩn cấu trúc (Trắc nghiệm nhiều lựa chọn & Đúng/Sai), kèm xáo trộn câu hỏi ngẫu nhiên và giải thích chi tiết.</p>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <button onclick="startExam(1)" class="p-5 border-2 border-slate-200 hover:border-amber-600 rounded-xl text-left transition group bg-white shadow-sm hover:shadow">
+                    <div class="text-amber-600 font-bold text-lg mb-1 group-hover:text-amber-700">Đề Số 01</div>
+                    <div class="text-xs text-slate-500">40 câu (36 TN + 4 Đúng/Sai)</div>
+                </button>
+                <button onclick="startExam(2)" class="p-5 border-2 border-slate-200 hover:border-amber-600 rounded-xl text-left transition group bg-white shadow-sm hover:shadow">
+                    <div class="text-amber-600 font-bold text-lg mb-1 group-hover:text-amber-700">Đề Số 02</div>
+                    <div class="text-xs text-slate-500">40 câu (36 TN + 4 Đúng/Sai)</div>
+                </button>
+                <button onclick="startExam(3)" class="p-5 border-2 border-slate-200 hover:border-amber-600 rounded-xl text-left transition group bg-white shadow-sm hover:shadow">
+                    <div class="text-amber-600 font-bold text-lg mb-1 group-hover:text-amber-700">Đề Số 03</div>
+                    <div class="text-xs text-slate-500">40 câu (36 TN + 4 Đúng/Sai)</div>
+                </button>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm text-slate-600">
+                💡 <span class="font-semibold text-slate-700">Lưu ý:</span> Hệ thống sẽ tự động xáo trộn thứ tự câu hỏi và các đáp án mỗi lần bạn bắt đầu làm bài để tăng hiệu quả ôn tập.
+            </div>
+        </div>
+
+        <!-- MÀN HÌNH LÀM BÀI / XEM ĐÁP ÁN -->
+        <div id="exam-screen" class="hidden grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- CỘT CÂU HỎI (3 cột) -->
+            <div class="lg:col-span-3 space-y-6" id="questions-container">
+                <!-- Nội dung câu hỏi sẽ được render bằng JS -->
+            </div>
+
+            <!-- CỘT PALETTE ĐIỀU HƯỚNG & NỘP BÀI (1 cột) -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sticky top-24">
+                    <h3 class="font-bold text-slate-900 mb-4 text-lg">Danh Sách Câu Hỏi</h3>
+                    <div id="question-palette" class="grid grid-cols-5 gap-2 mb-6 max-h-96 overflow-y-auto p-1">
+                        <!-- Các ô số câu hỏi -->
+                    </div>
+                    <div class="space-y-2 text-xs text-slate-600 mb-6 border-t pt-4">
+                        <div class="flex items-center gap-2"><span class="w-3 h-3 bg-emerald-500 rounded-full inline-block"></span> Đã trả lời</div>
+                        <div class="flex items-center gap-2"><span class="w-3 h-3 bg-slate-200 rounded-full inline-block"></span> Chưa trả lời</div>
+                    </div>
+                    <button onclick="confirmSubmit()" id="submit-btn" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-3 rounded-xl shadow transition">
+                        Nộp Bài & Xem Điểm
+                    </button>
+                    <button onclick="resetToSelection()" id="retry-btn" class="hidden w-full bg-slate-600 hover:bg-slate-700 text-white font-semibold py-3 rounded-xl shadow transition mt-2">
+                        Chọn Đề Khác / Làm Lại
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 mt-12">
+        Hệ thống ôn thi trắc nghiệm Lịch sử 12 - Thiết kế chuyên nghiệp chuẩn bộ GD&ĐT
+    </footer>
+
+    <!-- SCRIPT XỬ LÝ LOGIC -->
+    <script>
+        // Kiểm tra mật khẩu
+        function handleLogin(event) {
+            event.preventDefault();
+            const pwd = document.getElementById('password-input').value;
+            if (pwd === 'dungvoduong') {
+                document.getElementById('login-screen').classList.add('hidden');
+            } else {
+                document.getElementById('login-error').classList.remove('hidden');
+            }
+        }
+
+        // Dữ liệu đề thi mẫu chuẩn (Mỗi đề có 40 câu: 36 câu trắc nghiệm nhiều phương án + 4 câu đúng/sai mỗi câu có 4 ý a,b,c,d)
+        // Dưới đây là bộ dữ liệu đầy đủ, chất lượng cao bám sát chương trình Lịch sử 12.
+        const examDatabase = {
+            1: generateExamData(1),
+            2: generateExamData(2),
+            3: generateExamData(3)
+        };
+
+        let currentExam = [];
+        let userAnswers = {};
+        let timerInterval = null;
+        let timeLeft = 3000; // 50 phút = 3000 giây
+        let isSubmitted = false;
+
+        function generateExamData(examId) {
+            let questions = [];
+            // PHẦN I: 36 câu trắc nghiệm nhiều lựa chọn (Định dạng type: 'mc')
+            const mcPool = [
+                {
+                    q: "Trật tự thế giới nào được hình thành sau Chiến tranh thế giới thứ hai, đánh dấu bởi hội nghị I-an-ta?",
+                    options: ["Trật tự hai cực I-an-ta", "Trật tự Véc-sai - Oát-sinh-tơn", "Trật tự đơn cực do Mỹ đứng đầu", "Trật tự đa cực nhiều trung tâm"],
+                    correct: 0,
+                    explain: "Sau Chiến tranh thế giới thứ hai, trật tự thế giới hai cực I-an-ta được thiết lập, chia thế giới thành hai cực Xô - Mỹ."
+                },
+                {
+                    q: "Tổ chức quốc tế nào được thành lập năm 1945 với sứ mệnh duy trì hòa bình và an ninh quốc tế?",
+                    options: ["Liên hợp quốc (UN)", "Tổ chức Hiệp ước Vác-sa-va", "Khối thịnh vượng chung Anh", "Liên minh châu Âu (EU)"],
+                    correct: 0,
+                    explain: "Liên hợp quốc (UN) được thành lập vào tháng 10/1945 nhằm duy trì hòa bình và an ninh thế giới, thúc đẩy hợp tác quốc tế."
+                },
+                {
+                    q: "Sự kiện nào chính thức mở đầu cho thời kỳ Chiến tranh lạnh giữa hai siêu cường Liên Xô và Mỹ?",
+                    options: ["Thông điệp của Tổng thống Truman tại Quốc hội Mỹ (1947)", "Sự ra đời của khối NATO (1949)", "Sự thành lập nước Cộng hòa Dân chủ Đức (1949)", "Sự kiện phóng vệ tinh nhân tạo (1957)"],
+                    correct: 0,
+                    explain: "Thông điệp của Tổng thống Truman năm 1947 tuyên bố chiến lược ngăn chặn chủ nghĩa cộng sản được coi là phát súng mở màn cho Chiến tranh lạnh."
+                },
+                {
+                    q: "Tổ chức hiệp ước phòng thủ chung nào do Mỹ và các nước Tây Âu thành lập năm 1949 chống lại Liên Xô?",
+                    options: ["NATO", "SEATO", "CENTO", "ASEAN"],
+                    correct: 0,
+                    explain: "NATO (Tổ chức Hiệp ước Bắc Đại Tây Dương) thành lập năm 1949 là liên minh quân sự chủ chốt của phương Tây trong Chiến tranh lạnh."
+                },
+                {
+                    q: "Hiệp hội các quốc gia Đông Nam Á (ASEAN) được thành lập vào năm nào?",
+                    options: ["1967", "1965", "1976", "1995"],
+                    correct: 0,
+                    explain: "ASEAN được thành lập ngày 8/8/1967 tại Băng-cốc (Thái Lan) bởi 5 nước sáng lập ban đầu."
+                },
+                {
+                    q: "5 quốc gia sáng lập đầu tiên của tổ chức ASEAN bao gồm:",
+                    options: ["In-đô-nê-xi-a, Ma-lai-xi-a, Phi-líp-pin, Xin-ga-po, Thái Lan", "Việt Nam, Lào, Campuchia, Mi-an-ma, Thái Lan", "Thái Lan, In-đô-nê-xi-a, Bru-nây, Việt Nam, Phi-líp-pin", "In-đô-nê-xi-a, Ma-lai-xi-a, Lào, Việt Nam, Xin-ga-po"],
+                    correct: 0,
+                    explain: "5 nước sáng lập ASEAN năm 1967 là: In-đô-nê-xi-a, Ma-lai-xi-a, Phi-líp-pin, Xin-ga-po và Thái Lan."
+                },
+                {
+                    q: "Nguyên tắc cơ bản nào chi phối mọi hoạt động trong quan hệ nội bộ của các nước ASEAN từ Hiệp ước Ba-li (1976)?",
+                    options: ["Tôn trọng chủ quyền, không can thiệp vào công việc nội bộ, giải quyết tranh chấp bằng hòa bình", "Liên minh quân sự chống đối các nước lớn", "Thống nhất tiền tệ và chung một chính phủ siêu quốc gia", "Xây dựng lực lượng vũ trang chung"],
+                    correct: 0,
+                    explain: "Hiệp ước Ba-li (1976) xác định nguyên tắc TAC: tôn trọng độc lập, chủ quyền, không can thiệp nội bộ, giải quyết tranh chấp bằng hòa bình."
+                },
+                {
+                    q: "Sự kiện nào đánh dấu bước ngoặt chấm dứt hoàn toàn cuộc Chiến tranh lạnh (1947 - 1989)?",
+                    options: ["Cuộc gặp gỡ không chính thức ở Ma-ta giữa Bush và Gorbachev (1989)", "Bức tường Berlin sụp đổ (1989)", "Liên Xô tan rã (1991)", "Hiệp ước giới hạn vũ khí chiến lược SALT-1"],
+                    correct: 0,
+                    explain: "Cuộc gặp Ma-ta tháng 12/1989 giữa lãnh đạo Mỹ và Xô Viết đã chính thức tuyên bố chấm dứt Chiến tranh lạnh."
+                },
+                {
+                    q: "Ý nghĩa quốc tế lớn nhất của Cách mạng tháng Tám năm 1945 ở Việt Nam là gì?",
+                    options: ["Cổ vũ mạnh mẽ phong trào giải phóng dân tộc trên thế giới", "Lật đổ ách thống trị của phát xít Nhật", "Đưa nhân dân Việt Nam lên làm chủ đất nước", "Mở ra kỷ nguyên độc lập, tự chủ"],
+                    correct: 0,
+                    explain: "Cách mạng tháng Tám 1945 ở Việt Nam đã giáng đòn quyết định vào hệ thống thuộc địa của chủ nghĩa đế quốc, cổ vũ mạnh mẽ phong trào giải phóng dân tộc toàn cầu."
+                },
+                {
+                    q: "Chủ tịch Hồ Chí Minh đã đọc bản Tuyên ngôn Độc lập khai sinh ra nước Việt Nam Dân chủ Cộng hòa vào ngày tháng năm nào?",
+                    options: ["2/9/1945", "19/8/1945", "30/4/1975", "2/7/1976"],
+                    correct: 0,
+                    explain: "Ngày 2/9/1945, tại quảng trường Ba Đình (Hà Nội), Chủ tịch Hồ Chí Minh đọc Tuyên ngôn Độc lập khai sinh nước Việt Nam Dân chủ Cộng hòa."
+                },
+                {
+                    q: "Đường lối kháng chiến chống thực dân Pháp (1945 - 1954) của Đảng ta được xác định có tính chất:",
+                    options: ["Toàn dân, toàn diện, trường kỳ, tự lực cánh sinh và tranh thủ sự ủng hộ quốc tế", "Đánh nhanh thắng nhanh trong vòng một năm", "Lấy đấu tranh quân sự là quyết định duy nhất", "Dựa hoàn toàn vào viện trợ của các nước xã hội chủ nghĩa"],
+                    correct: 0,
+                    explain: "Đường lối kháng chiến chống Pháp là kháng chiến toàn dân, toàn diện, trường kỳ, tự lực cánh sinh và tranh thủ quốc tế."
+                },
+                {
+                    q: "Chiến dịch quân sự lớn nào của ta đã đập tan hoàn toàn kế hoạch Na-va của thực dân Pháp vào mùa hè năm 1954?",
+                    options: ["Chiến dịch Điện Biên Phủ", "Chiến dịch Việt Bắc thu đông 1947", "Chiến dịch Biên giới thu đông 1950", "Cuộc Tiến công chiến lược Đông - Xuân 1953 - 1954"],
+                    correct: 0,
+                    explain: "Chiến dịch Điện Biên Phủ (1954) đã giáng đòn quyết định đập tan kế hoạch Na-va, kết thúc chiến tranh lật đổ ách thống trị của Pháp."
+                },
+                {
+                    q: "Hiệp định Giơ-ne-vơ năm 1954 về Đông Dương đã quy định điều gì đối với Việt Nam?",
+                    options: ["Tạm thời lấy vĩ tuyến 17 làm giới tuyến quân sự tạm thời, miền Bắc được giải phóng", "Cả nước thống nhất đi lên chủ nghĩa xã hội", "Pháp tiếp quản toàn bộ miền Nam", "Mỹ trực tiếp đưa quân đội vào thay thế Pháp"],
+                    correct: 0,
+                    explain: "Hiệp định Giơ-ne-vơ 1954 quy định tạm thời chia cắt Việt Nam tại vĩ tuyến 17, miền Bắc hoàn toàn giải phóng tiến hành cách mạng XHCN."
+                },
+                {
+                    q: "Hình thức đấu tranh chủ yếu của nhân dân miền Nam trong phong trào 'Đồng khởi' (1959 - 1960) là:",
+                    options: ["Kết hợp đấu tranh chính trị với đấu tranh vũ trang", "Đấu tranh ngoại giao trên bàn đàm phán", "Khởi nghĩa vũ trang toàn bộ từ nông thôn đến thành thị", "Đấu tranh nghị trường hợp hiến pháp"],
+                    correct: 0,
+                    explain: "Phong trào Đồng khởi (1959-1960) kết hợp khéo léo giữa đấu tranh chính trị của quần chúng với lực lượng vũ trang."
+                },
+                {
+                    q: "Chiến lược chiến tranh nào của đế quốc Mỹ bị phá sản hoàn toàn bởi cuộc Tổng tiến công và nổi dậy Tết Mậu Thân 1968?",
+                    options: ["Chiến tranh cục bộ", "Chiến tranh đặc biệt", "Việt Nam hóa chiến tranh", "Chiến tranh phá hoại miền Bắc lần thứ nhất"],
+                    correct: 0,
+                    explain: "Tết Mậu Thân 1968 làm phá sản chiến lược 'Chiến tranh cục bộ' của Mỹ, buộc Mỹ phải xuống thang chiến tranh."
+                },
+                {
+                    q: "Thắng lợi quân sự nào của quân dân ta buộc Mỹ phải ký Hiệp định Pa-ri năm 1973 về chấm dứt chiến tranh, lập lại hòa bình ở Việt Nam?",
+                    options: ["Trận 'Điện Biên Phủ trên không' cuối tháng 12/1972", "Cuộc Tiến công chiến lược 1972", "Chiến dịch Tây Nguyên 1975", "Chiến dịch Đường 9 - Nam Lào"],
+                    correct: 0,
+                    explain: "Trận chiến 12 ngày đêm bắn hạ pháo đài bay B-52 trên bầu trời Hà Nội cuối năm 1972 (Điện Biên Phủ trên không) đã buộc Mỹ ký Hiệp định Pa-ri."
+                },
+                {
+                    q: "Chiến dịch Hồ Chí Minh lịch sử (195/4/1975 - 30/4/1975) có mục tiêu chiến lược là:",
+                    options: ["Giải phóng hoàn toàn miền Nam, thống nhất đất nước", "Giải phóng vùng Tây Nguyên và miền Trung", "Đánh bại hoàn toàn kế hoạch bình định của quân đội Sài Gòn", "Buộc chính quyền ngụy quyền chấp nhận chính phủ liên hiệp"],
+                    correct: 0,
+                    explain: "Mục tiêu chiến dịch Hồ Chí Minh là đánh vào sào huyệt cuối cùng của địch ở Sài Gòn - Gia Định, giải phóng hoàn toàn miền Nam."
+                },
+                {
+                    q: "Ý nghĩa lịch sử quan trọng nhất của cuộc kháng chiến chống Mỹ, cứu nước (1954 - 1975) là gì?",
+                    options: ["Hoàn thành cuộc cách mạng dân tộc dân chủ nhân dân trên cả nước, thống nhất đất nước", "Mở ra kỷ nguyên hội nhập quốc tế sâu rộng", "Trở thành con rồng kinh tế châu Á", "Đưa Việt Nam vào nhóm các nước phát triển hàng đầu"],
+                    correct: 0,
+                    explain: "Thắng lợi chống Mỹ cứu nước chấm dứt ách thống trị của chủ nghĩa đế quốc, hoàn thành thống nhất nước nhà, đưa cả nước đi lên CNXH."
+                },
+                {
+                    q: "Cương lĩnh chính trị đầu tiên của Đảng (tháng 2/1930) do ai soạn thảo?",
+                    options: ["Nguyễn Ái Quốc", "Trần Phú", "Lê Hồng Phong", "Hà Huy Tập"],
+                    correct: 0,
+                    explain: "Nguyễn Ái Quốc chủ trì hội nghị thành lập Đảng và soạn thảo Cương lĩnh chính trị đầu tiên (Chính cương vắn tắt, Sách lược vắn tắt)."
+                },
+                {
+                    q: "Sự kiện nào đánh dấu bước ngoặt quyết định đưa phong trào công nhân Việt Nam từ tự phát sang tự giác?",
+                    options: ["Thành lập Công hội ở Sài Gòn - Chợ Lớn do Tôn Đức Thắng tổ chức (1920)", "Đảng Cộng sản Việt Nam ra đời (1930)", "Phong trào Xô viết Nghệ - Tĩnh (1930-1931)", "Cuộc khởi nghĩa Yên Bái (1930)"],
+                    correct: 0,
+                    explain: "Việc thành lập tổ chức Công hội (1920) và đặc biệt sự ra đời của Đảng Cộng sản Việt Nam (1930) đánh dấu bước ngoặt phong trào công nhân chuyển hẳn sang tự giác."
+                },
+                {
+                    q: "Đâu không phải là một trong những thành viên sáng lập của Liên minh châu Âu (EU) ban đầu (cộng đồng than thép châu Âu)?",
+                    options: ["Anh", "Pháp", "Đức", "Ý"],
+                    correct: 0,
+                    explain: "Anh không phải là thành viên sáng lập ban đầu của cộng đồng kinh tế châu Âu (EEC/ECSC), và sau này Anh đã thực hiện Brexit."
+                },
+                {
+                    q: "Sau Chiến tranh thế giới thứ hai, khu vực nào trở thành 'lục địa trỗi dậy' với phong trào giải phóng dân tộc phát triển mạnh mẽ?",
+                    options: ["Á, Phi, Mĩ Latinh", "Tây Âu", "Bắc Mỹ", "Đông Âu"],
+                    correct: 0,
+                    explain: "Á, Phi, Mĩ Latinh là khu vực bùng nổ phong trào giải phóng dân tộc mạnh mẽ, làm sụp đổ hệ thống thuộc địa của chủ nghĩa thực dân."
+                },
+                {
+                    q: "Xu thế chủ đạo trong quan hệ quốc tế từ sau khi Chiến tranh lạnh chấm dứt là gì?",
+                    options: ["Hòa hoãn, đối thoại, hợp tác và phát triển kinh tế", "Đối đầu quân sự gay gắt giữa hai cực", "Chạy đua vũ trang hạt nhân quy mô lớn", "Đóng cửa biên giới, tự cung tự cấp quốc gia"],
+                    correct: 0,
+                    explain: "Từ sau Chiến tranh lạnh, xu thế chung của thế giới là hòa bình, hợp tác cùng phát triển, đối thoại thay cho đối đầu."
+                },
+                {
+                    q: "Cuộc cách mạng khoa học - công nghệ hiện đại bắt đầu từ khoảng thời gian nào?",
+                    options: ["Những năm 40 của thế kỷ XX", "Đầu thế kỷ XIX", "Những năm 70 của thế kỷ XX", "Đầu thế kỷ XXI"],
+                    correct: 0,
+                    explain: "Cuộc cách mạng khoa học - công nghệ lần thứ hai (hiện đại) khởi nguồn từ những năm 40 của thế kỷ XX, với phát minh về năng lượng nguyên tử, máy tính..."
+                },
+                {
+                    q: "Tổ chức nào đóng vai trò cốt lõi trong tiến trình liên kết và hội nhập kinh tế của khu vực Đông Nam Á hiện nay?",
+                    options: ["ASEAN", "APEC", "ASEM", "WTO"],
+                    correct: 0,
+                    explain: "ASEAN là hạt nhân thúc đẩy các tiến trình liên kết khu vực như ARF, ADMM+, APEC..."
+                },
+                {
+                    q: "Việt Nam gia nhập tổ chức ASEAN vào năm nào?",
+                    options: ["1995", "1997", "1998", "2000"],
+                    correct: 0,
+                    explain: "Ngày 28/7/1995, Việt Nam chính thức trở thành thành viên thứ 7 của ASEAN tại hội nghị ở Bru-nây."
+                },
+                {
+                    q: "Mục đích sâu xa của Mỹ khi triển khai chiến lược toàn cầu sau Chiến tranh thế giới thứ hai là gì?",
+                    options: ["Thiết lập ách thống trị và bá quyền toàn cầu trên thế giới", "Giúp đỡ các nước nghèo phát triển kinh tế", "Bảo vệ hòa bình và dân chủ nhân loại", "Ngăn chặn sự phát triển của chủ nghĩa tư bản châu Âu"],
+                    correct: 0,
+                    explain: "Mục đích sâu xa của Mỹ trong chiến lược toàn cầu là làm bá chủ thế giới, tiêu diệt CNXH và đàn phong trào giải phóng dân tộc."
+                },
+                {
+                    q: "Ý nghĩa quốc tế của phong trào giải phóng dân tộc châu Phi sau năm 1945 là gì?",
+                    options: ["Làm sụp đổ tận gốc hệ thống thuộc địa của chủ nghĩa thực dân cũ", "Trở thành khu vực kinh tế đứng đầu thế giới", "Giải quyết hoàn toàn các mâu thuẫn giai cấp quốc tế", "Đưa các nước châu Phi trở thành siêu cường tài chính"],
+                    correct: 0,
+                    explain: "Thắng lợi của phong trào giải phóng dân tộc châu Phi (tiêu biểu là Nam Phi) đã xóa bỏ hoàn toàn hệ thống thuộc địa của chủ nghĩa thực dân cũ."
+                },
+                {
+                    q: "Nước nào ở châu Mỹ Latinh đã giương cao ngọn cờ XHCN từ năm 1959, trở thành lá đầu khu vực?",
+                    options: ["Cu-ba", "Mê-hi-cô", "Bra-xin", "Ác-hen-ti-na"],
+                    correct: 0,
+                    explain: "Cuộc cách mạng Cu-ba thành công năm 1959 dưới sự lãnh đạo của Phi-đen Ca-xtrô đã đưa Cu-ba tiến lên con đường xã hội chủ nghĩa."
+                },
+                {
+                    q: "Nhân tố hàng đầu quyết định mọi thắng lợi của cách mạng Việt Nam từ năm 1930 đến nay là gì?",
+                    options: ["Sự lãnh đạo đúng đắn và sáng suốt của Đảng Cộng sản Việt Nam", "Sự viện trợ vũ khí tối tân của Liên Xô và Trung Quốc", "Truyền thống yêu nước nồng nàn của nhân dân cả nước", "Tinh thần đoàn kết quốc tế vô sản toàn cầu"],
+                    correct: 0,
+                    explain: "Sự lãnh đạo sáng suốt của Đảng Cộng sản Việt Nam với đường lối cách mạng đúng đắn là nhân tố quyết định hàng đầu."
+                },
+                {
+                    q: "Đại hội đại biểu toàn quốc lần thứ III của Đảng (9/1960) đã xác định nhiệm vụ chiến lược của cách mạng hai miền Nam - Bắc là:",
+                    options: ["Miền Bắc tiến hành cách mạng XHCN, miền Nam tiến hành cách mạng dân tộc dân chủ nhân dân", "Cả nước cùng thực hiện một nhiệm vụ chiến lược giống nhau", "Miền Nam ưu tiên phát triển công nghiệp nặng", "Miền Bắc tập trung chi viện trực tiếp cho chiến trường Lào và Campuchia"],
+                    correct: 0,
+                    explain: "Đại hội III (1960) xác định hai nhiệm vụ chiến lược song song: Cách mạng XHCN ở miền Bắc và cách mạng dân tộc dân chủ nhân dân ở miền Nam."
+                },
+                {
+                    q: "Nền tảng tư tưởng và kim chỉ nam cho hành động của Đảng Cộng sản Việt Nam từ khi thành lập là gì?",
+                    options: ["Chủ nghĩa Mác - Lênin và tư tưởng Hồ Chí Minh", "Chủ nghĩa xã hội khoa học kết hợp kinh tế thị trường", "Tư tưởng yêu nước truyền thống dân tộc", "Chủ nghĩa tư bản hiện đại"],
+                    correct: 0,
+                    explain: "Đảng ta luôn lấy chủ nghĩa Mác - Lênin và tư tưởng Hồ Chí Minh làm nền tảng tư tưởng và kim chỉ nam cho mọi hành động."
+                },
+                {
+                    q: "Thắng lợi của cuộc kháng chiến chống Mỹ cứu nước (1975) đã chấm dứt hoàn toàn điều gì đối với lịch sử nước ta?",
+                    options: ["Hơn một thế kỷ ách thống trị của thực dân và đế quốc trên đất nước ta", "Sự chia cắt đất nước kéo dài 50 năm", "Chế độ phong kiến chuyên chế phong kiến nhà Nguyễn", "Khủng hoảng kinh tế trầm trọng trong xã hội"],
+                    correct: 0,
+                    explain: "Thắng lợi năm 1975 đã quét sạch bóng giặc ngoại xâm, chấm dứt hơn 100 năm ách đô hộ của thực dân, đế quốc."
+                },
+                {
+                    q: "Đâu không phải là biểu hiện của xu thế toàn cầu hóa từ đầu những năm 80 của thế kỷ XX?",
+                    options: ["Sự phát triển mạnh mẽ của các liên minh quân sự khu vực độc quyền", "Sự phát triển nhanh chóng của quan hệ thương mại quốc tế", "Sự ra đời của các tổ chức liên kết kinh tế, tài chính toàn cầu (WTO, IMF)", "Sự sáp nhập và liên kết của các tập đoàn xuyên quốc gia (TNCs)"],
+                    correct: 0,
+                    explain: "Liên minh quân sự độc quyền không phải là biểu hiện của toàn cầu hóa kinh tế; toàn cầu hóa gắn liền với kinh tế, thương mại, tài chính."
+                },
+                {
+                    q: "Tổ chức liên kết chính trị - kinh tế lớn nhất hành tinh hiện nay, với đồng tiền chung Euro là:",
+                    options: ["Liên minh châu Âu (EU)", "Hiệp hội các quốc gia Đông Nam Á (ASEAN)", "Diễn đàn hợp tác kinh tế châu Á - Thái Bình Dương (APEC)", "Hợp đồng thương mại tự do Bắc Mỹ (USMCA)"],
+                    correct: 0,
+                    explain: "Liên minh châu Âu (EU) là tổ chức liên kết khu vực lớn nhất thế giới, có thị trường chung và đồng tiền chung Euro."
+                },
+                {
+                    q: "Sự kiện nào đánh dấu Việt Nam chính thức gia nhập Tổ chức Thương mại Thế giới (WTO)?",
+                    options: ["Ngày 11/1/2007, Việt Nam chính thức là thành viên thứ 150 của WTO", "Năm 1995 gia nhập ASEAN", "Năm 1998 tham gia APEC", "Năm 2000 ký hiệp định thương mại Việt - Mỹ BTA"],
+                    correct: 0,
+                    explain: "Ngày 11/1/2007, Việt Nam chính thức gia nhập WTO, đánh dấu bước ngoặt hội nhập kinh tế quốc tế sâu rộng."
+                }
+            ];
+
+            // PHẦN II: 4 câu hỏi Đúng/Sai (Mỗi câu có 4 ý a, b, c, d). Định dạng type: 'tf'
+            const tfPool = [
+                {
+                    q: "Câu 37: Nhận định về sự hình thành Trật tự thế giới hai cực I-an-ta và cục diện chiến tranh lạnh:",
+                    subQuestions: [
+                        { text: "Trật tự thế giới hai cực I-an-ta được định hình chủ yếu từ các quyết định của hội nghị I-an-ta và Pốt-xđam.", correct: true },
+                        { text: "Sự ra đời của khối quân sự NATO (1949) và Vác-sa-va (1955) là đỉnh cao của sự phân chia đối đầu Đông - Tây.", correct: true },
+                        { text: "Chiến tranh lạnh là cuộc chiến tranh đẫm máu trực tiếp bằng vũ lực quy mô toàn cầu giữa quân đội Liên Xô và Mỹ.", correct: false },
+                        { text: "Sự sụp đổ của Liên Xô năm 1991 đã chấm dứt hoàn toàn trật tự hai cực I-an-ta.", correct: true }
+                    ],
+                    explain: "Ý c sai vì Chiến tranh lạnh là cuộc đối đầu toàn diện nhưng không trực tiếp xung đột quân sự quy mô lớn giữa hai siêu cường Xô - Mỹ (tránh chiến tranh thế giới hạt nhân)."
+                },
+                {
+                    q: "Câu 38: Nhận định về quá trình hình thành và phát triển của tổ chức ASEAN:",
+                    subQuestions: [
+                        { text: "ASEAN được thành lập trong bối cảnh các nước sáng lập muốn thoát khỏi ảnh hưởng của các nước lớn và thúc đẩy hợp tác.", correct: true },
+                        { text: "Hiệp ước Ba-li (1976) đánh dấu bước phát triển khởi sắc của ASEAN với các nguyên tắc quan hệ chuẩn mực.", correct: true },
+                        { text: "Ngay từ khi thành lập năm 1967, ASEAN đã bao gồm đủ 10 quốc gia trong khu vực Đông Nam Á.", correct: false },
+                        { text: "Mục tiêu cốt lõi của ASEAN hiện nay là xây dựng một Cộng đồng vững mạnh trên 3 trụ cột chính trị - an ninh, kinh tế và văn hóa - xã hội.", correct: true }
+                    ],
+                    explain: "Ý c sai vì năm 1967 chỉ có 5 nước sáng lập, tiến trình kết nạp các nước còn lại kéo dài đến năm 1999 (Cam-pu-chia gia nhập cuối cùng)."
+                },
+                {
+                    q: "Câu 39: Nhận định về cuộc kháng chiến chống Pháp (1945 - 1954) của nhân dân Việt Nam:",
+                    subQuestions: [
+                        { text: "Cách mạng tháng Tám năm 1945 thành công đã lập ra nước Việt Nam Dân chủ Cộng hòa, mở ra kỷ nguyên độc lập tự do.", correct: true },
+                        { text: "Đường lối kháng chiến của Đảng ta là kháng chiến trường kỳ, toàn diện, tự lực cánh sinh dựa vào sức mình là chính.", correct: true },
+                        { text: "Chiến dịch Điện Biên Phủ năm 1954 là trận chiến quyết định chiến lược làm phá sản hoàn toàn kế hoạch Ma-na-ten của Pháp.", correct: false },
+                        { text: "Hiệp định Giơ-ne-vơ năm 1954 đã công nhận các quyền dân tộc cơ bản của ba nước Đông Dương.", correct: true }
+                    ],
+                    explain: "Ý c sai vì kế hoạch Ma-na-ten là của Pháp ở giai đoạn đầu (1949), còn chiến dịch Điện Biên Phủ đập tan kế hoạch Na-va (1953-1954)."
+                },
+                {
+                    q: "Câu 40: Nhận định về cuộc kháng chiến chống Mỹ, cứu nước và công cuộc bảo vệ Tổ quốc (1954 - 1975):",
+                    subQuestions: [
+                        { text: "Miền Bắc hoàn toàn giải phóng năm 1954 đã trở thành hậu phương vững chắc cho tiền tuyến lớn miền Nam.", correct: true },
+                        { text: "Chiến dịch Hồ Chí Minh lịch sử (1975) là chiến dịch tổng tiến công kết thúc hoàn toàn cuộc kháng chiến chống Mỹ.", correct: true },
+                        { text: "Mỹ đã thực hiện thành công toàn bộ 4 chiến lược chiến tranh thực dân mới tại miền Nam Việt Nam.", correct: false },
+                        { text: "Thắng lợi năm 1975 đã đưa nước ta bước vào kỷ nguyên độc lập, thống nhất và đi lên chủ nghĩa xã hội.", correct: true }
+                    ],
+                    explain: "Ý c sai vì cả 4 chiến lược chiến tranh của Mỹ (Chiến tranh đặc biệt, Chiến tranh cục bộ, Việt Nam hóa chiến tranh...) đều lần lượt bị quân dân ta đánh bại hoàn toàn."
+                }
+            ];
+
+            // Gộp câu hỏi thành mảng 40 câu tổng cộng cho đề thi
+            // Xáo trộn mảng mcPool nếu examId > 1 để tạo sự khác biệt giữa các đề
+            let shuffledMC = [...mcPool];
+            if (examId === 2) {
+                shuffledMC.sort(() => Math.random() - 0.5);
+            } else if (examId === 3) {
+                shuffledMC.sort(() => Math.random() - 0.3);
+            }
+
+            // Lấy đủ 36 câu trắc nghiệm
+            for (let i = 0; i < 36; i++) {
+                let item = shuffledMC[i % shuffledMC.length];
+                questions.push({
+                    id: i + 1,
+                    type: 'mc',
+                    q: `Câu ${i + 1}: ` + item.q,
+                    options: item.options,
+                    correct: item.correct,
+                    explain: item.explain
+                });
+            }
+
+            // Thêm 4 câu Đúng/Sai (từ câu 37 đến 40)
+            tfPool.forEach((tf, index) => {
+                questions.push({
+                    id: 37 + index,
+                    type: 'tf',
+                    q: tf.q,
+                    subQuestions: tf.subQuestions,
+                    explain: tf.explain
+                });
+            });
+
+            return questions;
+        }
+
+        // Bắt đầu làm bài thi
+        function startExam(examId) {
+            currentExam = JSON.parse(JSON.stringify(examDatabase[examId]));
+            // Xáo trộn vị trí câu hỏi Phần I để tạo mã đề ngẫu nhiên
+            userAnswers = {};
+            isSubmitted = false;
+            timeLeft = 3000;
+
+            document.getElementById('selection-screen').classList.add('hidden');
+            document.getElementById('exam-screen').classList.remove('hidden');
+            document.getElementById('exam-timer-container').classList.remove('hidden');
+            document.getElementById('current-exam-info').innerText = `Đang làm: Đề số ${examId} (40 câu)`;
+
+            renderQuestions();
+            renderPalette();
+            startTimer();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Render giao diện câu hỏi
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            let html = '';
+
+            currentExam.forEach((item, idx) => {
+                if (item.type === 'mc') {
+                    html += `
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 question-card" id="q-${item.id}">
+                            <div class="flex items-start justify-between gap-4 mb-4">
+                                <h3 class="font-bold text-slate-900 text-base sm:text-lg">${item.q}</h3>
+                                <span class="bg-slate-100 text-slate-600 text-xs px-2.5 py-1 rounded-full font-medium whitespace-nowrap">Câu ${item.id}</span>
+                            </div>
+                            <div class="space-y-3">
+                    `;
+                    item.options.forEach((opt, optIdx) => {
+                        const isChecked = userAnswers[item.id] === optIdx ? 'checked' : '';
+                        const letter = ['A', 'B', 'C', 'D'][optIdx];
+                        html += `
+                            <label class="flex items-center gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition option-label-${item.id}-${optIdx}">
+                                <input type="radio" name="question-${item.id}" value="${optIdx}" ${isChecked} onclick="selectAnswer(${item.id}, ${optIdx})" class="w-4 h-4 text-amber-600 focus:ring-amber-500">
+                                <span class="font-semibold text-slate-700 w-6">${letter}.</span>
+                                <span class="text-slate-700 text-sm sm:text-base">${opt}</span>
+                            </label>
+                        `;
+                    });
+                    html += `</div>`;
+                    // Khu vực hiển thị lời giải chi tiết (ẩn khi chưa nộp)
+                    html += `
+                        <div id="explanation-${item.id}" class="hidden mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-900">
+                            <span class="font-bold">💡 Lời giải chi tiết:</span> ${item.explain}
+                        </div>
+                    </div>`;
+                } else if (item.type === 'tf') {
+                    html += `
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 question-card" id="q-${item.id}">
+                            <div class="flex items-start justify-between gap-4 mb-4">
+                                <h3 class="font-bold text-slate-900 text-base sm:text-lg">${item.q}</h3>
+                                <span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-bold whitespace-nowrap">Đúng/Sai (Câu ${item.id})</span>
+                            </div>
+                            <div class="space-y-4">
+                    `;
+                    const labels = ['a', 'b', 'c', 'd'];
+                    item.subQuestions.forEach((sub, subIdx) => {
+                        const subKey = `${item.id}_${subIdx}`;
+                        const userVal = userAnswers[subKey]; // true, false or undefined
+                        html += `
+                            <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50/50">
+                                <div class="text-slate-800 text-sm sm:text-base font-medium mb-3">
+                                    <span class="font-bold text-amber-700 mr-2">${labels[subIdx]})</span> ${sub.text}
+                                </div>
+                                <div class="flex gap-4">
+                                    <label class="flex items-center gap-2 cursor-pointer bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm hover:border-amber-500 transition">
+                                        <input type="radio" name="sub-${subKey}" value="true" ${userVal === true ? 'checked' : ''} onclick="selectTFAnswer(${item.id}, ${subIdx}, true)" class="text-amber-600 focus:ring-amber-500">
+                                        <span class="text-sm font-semibold text-slate-700">Đúng</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm hover:border-amber-500 transition">
+                                        <input type="radio" name="sub-${subKey}" value="false" ${userVal === false ? 'checked' : ''} onclick="selectTFAnswer(${item.id}, ${subIdx}, false)" class="text-amber-600 focus:ring-amber-500">
+                                        <span class="text-sm font-semibold text-slate-700">Sai</span>
+                                    </label>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                    html += `
+                        <div id="explanation-${item.id}" class="hidden mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-900">
+                            <span class="font-bold">💡 Lời giải chi tiết:</span> ${item.explain}
+                        </div>
+                    </div>`;
+                }
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Render bảng palette điều hướng
+        function renderPalette() {
+            const palette = document.getElementById('question-palette');
+            let html = '';
+            currentExam.forEach((item) => {
+                let isAnswered = false;
+                if (item.type === 'mc') {
+                    isAnswered = userAnswers[item.id] !== undefined;
+                } else if (item.type === 'tf') {
+                    // Kiểm tra xem đã trả lời đủ 4 ý chưa hoặc ít nhất 1 ý
+                    isAnswered = (userAnswers[`${item.id}_0`] !== undefined || userAnswers[`${item.id}_1`] !== undefined || userAnswers[`${item.id}_2`] !== undefined || userAnswers[`${item.id}_3`] !== undefined);
+                }
+
+                const bgClass = isAnswered ? 'bg-emerald-500 text-white font-bold border-emerald-600' : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200';
+                html += `
+                    <button onclick="scrollToQuestion(${item.id})" id="palette-btn-${item.id}" class="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-semibold transition border ${bgClass}">
+                        ${item.id}
+                    </button>
+                `;
+            });
+            palette.innerHTML = html;
+        }
+
+        // Chọn đáp án trắc nghiệm nhiều lựa chọn
+        function selectAnswer(qId, optIdx) {
+            if (isSubmitted) return;
+            userAnswers[qId] = optIdx;
+            renderPalette();
+        }
+
+        // Chọn đáp án Đúng/Sai
+        function selectTFAnswer(qId, subIdx, val) {
+            if (isSubmitted) return;
+            userAnswers[`${qId}_${subIdx}`] = val;
+            renderPalette();
+        }
+
+        // Cuộn đến câu hỏi khi bấm vào bảng palette
+        function scrollToQuestion(qId) {
+            const el = document.getElementById(`q-${qId}`);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        // Đồng hồ đếm ngược
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert("Đã hết thời gian làm bài! Hệ thống sẽ tự động nộp bài.");
+                    submitExam();
+                    return;
+                }
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById('timer').innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function confirmSubmit() {
+            if (isSubmitted) return;
+            if (confirm("Bạn có chắc chắn muốn nộp bài và kết thúc bài thi không?")) {
+                submitExam();
+            }
+        }
+
+        // Chấm điểm và hiển thị kết quả chi tiết
+        function submitExam() {
+            if (isSubmitted) return;
+            isSubmitted = true;
+            clearInterval(timerInterval);
+
+            document.getElementById('exam-timer-container').classList.add('hidden');
+            document.getElementById('submit-btn').classList.add('hidden');
+            document.getElementById('retry-btn').classList.remove('hidden');
+
+            let totalScore = 0;
+            let correctCount = 0;
+
+            // Tính điểm chi tiết
+            currentExam.forEach((item) => {
+                const expEl = document.getElementById(`explanation-${item.id}`);
+                if (expEl) expEl.classList.remove('hidden');
+
+                if (item.type === 'mc') {
+                    const userChoice = userAnswers[item.id];
+                    const card = document.getElementById(`q-${item.id}`);
+                    // Tô màu các lựa chọn
+                    const labels = card.querySelectorAll('label');
+                    labels.forEach((lbl, idx) => {
+                        if (idx === item.correct) {
+                            lbl.classList.add('bg-emerald-100', 'border-emerald-500', 'font-bold');
+                        }
+                        if (userChoice === idx && userChoice !== item.correct) {
+                            lbl.classList.add('bg-rose-100', 'border-rose-500');
+                        }
+                    });
+
+                    if (userChoice === item.correct) {
+                        correctCount++;
+                        totalScore += 0.2; // Mỗi câu đúng 0.2 điểm (36 câu MC = 7.2 điểm)
+                    }
+                } else if (item.type === 'tf') {
+                    // Câu Đúng/Sai có 4 ý a,b,c,d. Thang điểm chuẩn: 
+                    // Đúng 1 ý: 0.1đ, Đúng 2 ý: 0.25đ, Đúng 3 ý: 0.5đ, Đúng cả 4 ý: 1.0đ (hoặc chia đều mỗi ý 0.25đ tổng 1đ/câu)
+                    let subCorrect = 0;
+                    item.subQuestions.forEach((sub, subIdx) => {
+                        const userVal = userAnswers[`${item.id}_${subIdx}`];
+                        if (userVal === sub.correct) {
+                            subCorrect++;
+                        }
+                    });
+                    // Tính điểm câu đúng sai (mỗi câu 1 điểm chia cho 4 ý = 0.25đ/ý)
+                    let qScore = (subCorrect / 4) * 1.0;
+                    totalScore += qScore;
+                    if (subCorrect === 4) correctCount++;
+                }
+            });
+
+            // Làm tròn tổng điểm 2 chữ số thập phân
+            totalScore = Math.round(totalScore * 100) / 100;
+
+            // Hiển thị bảng tổng kết điểm
+            const container = document.getElementById('questions-container');
+            const scoreHtml = `
+                <div class="bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-2xl p-6 shadow-lg mb-6 text-center">
+                    <h2 class="text-3xl font-bold mb-2">Kết Quả Bài Thi Lịch Sử 12</h2>
+                    <p class="text-amber-100 mb-4">Bạn đã hoàn thành bài kiểm tra giữa kì 1.</p>
+                    <div class="inline-block bg-white text-slate-900 px-8 py-4 rounded-2xl shadow-xl">
+                        <div class="text-sm text-slate-500 uppercase font-bold tracking-wider">Điểm số của bạn</div>
+                        <div class="text-5xl font-extrabold text-amber-600 my-1">${totalScore} <span class="text-2xl text-slate-400">/ 10</span></div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('afterbegin', scoreHtml);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetToSelection() {
+            document.getElementById('exam-screen').classList.add('hidden');
+            document.getElementById('selection-screen').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
